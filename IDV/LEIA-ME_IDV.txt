@@ -1,0 +1,39 @@
+CAUCIFER — IDV OFICIAL v2
+
+Esta é a versão canônica padronizada a partir do símbolo e wordmark usados nas últimas artes.
+
+CONTEÚDO
+svg/
+- Logo Horizontal Dark: uso principal em fundos claros.
+- Logo Horizontal White: uso principal em fundos escuros.
+- Monochrome Black / White: aplicações de uma cor.
+- Símbolo Green / Black / White: ícone isolado.
+
+png/
+- Mesmas versões com fundo transparente, em alta resolução.
+
+eps/
+- Vetores para fluxos gráficos e impressão.
+
+favicon/
+- Símbolo em 512, 256, 128, 64 e 32 px.
+
+CORES
+Green Dark  #14CE6D
+Green       #31EA86
+Green Light #72F5A8
+Deep Green  #003E33
+Ink         #0B1511
+White       #FFFFFF
+
+WORDMARK
+A tipografia foi convertida em curvas dentro dos SVGs. Não é necessário instalar fonte para abrir ou produzir o logo.
+
+REGRAS DE USO
+- Não distorcer, inclinar ou alterar proporções.
+- Não alterar o recorte/abertura do símbolo “C”.
+- Não alterar a relação símbolo + wordmark.
+- Preserve área de respiro mínima de 1/2 da altura do símbolo.
+- Fundo claro: usar Horizontal Dark.
+- Fundo escuro: usar Horizontal White.
+- Para aplicações pequenas, usar apenas o Símbolo Green.

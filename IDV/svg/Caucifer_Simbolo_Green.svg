@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+      
+<defs>
+  <linearGradient id="cg" x1="0%" y1="100%" x2="100%" y2="0%">
+    <stop offset="0%" stop-color="#14CE6D"/>
+    <stop offset="50%" stop-color="#31EA86"/>
+    <stop offset="100%" stop-color="#72F5A8"/>
+  </linearGradient>
+  <mask id="cmask">
+    <rect width="240" height="240" fill="black"/>
+    <circle cx="120" cy="120" r="78" fill="white"/>
+    <circle cx="120" cy="120" r="43" fill="black"/>
+    <polygon points="120,120 219.59,36.44 219.59,203.56" fill="black"/>
+  </mask>
+</defs>
+
+<g mask="url(#cmask)">
+  <rect width="240" height="240" fill="url(#cg)"/>
+  <polygon points="45,112 93,43 122,120" fill="#0FC86A" opacity=".38"/>
+  <polygon points="93,43 158,53 122,120" fill="#8AFFC5" opacity=".34"/>
+  <polygon points="122,120 158,53 194,92" fill="#52F29A" opacity=".28"/>
+  <polygon points="45,112 122,120 69,186" fill="#1DDD78" opacity=".30"/>
+  <polygon points="122,120 69,186 142,199" fill="#67F6AA" opacity=".34"/>
+</g>
+
+    </svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+      
+        <g>
+          <defs>
+            <mask id="cmask_m">
+              <rect width="240" height="240" fill="black"/>
+              <circle cx="120" cy="120" r="78" fill="white"/>
+              <circle cx="120" cy="120" r="43" fill="black"/>
+              <polygon points="120,120 219.59,36.44 219.59,203.56" fill="black"/>
+            </mask>
+          </defs>
+          <rect width="240" height="240" fill="#000000" mask="url(#cmask_m)"/>
+        </g>
+        
+    </svg>
