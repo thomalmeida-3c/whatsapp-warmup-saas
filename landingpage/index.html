@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Caucifer: compre números para WhatsApp, acompanhe a preparação e organize sua operação em um só lugar." />
+  <title>Caucifer — Números preparados para sua operação</title>
+  <link rel="icon" type="image/png" href="./caucifer-logo.png" />
+  <link rel="apple-touch-icon" href="./caucifer-logo.png" />
+
+  <!-- Tailwind via CDN: ideal para MVP e validação rápida. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            soft: '0 20px 70px rgba(15,23,42,.10)',
+            glow: '0 0 80px rgba(34,197,94,.18)',
+          },
+          animation: {
+            float: 'float 7s ease-in-out infinite',
+            floatSlow: 'float 10s ease-in-out infinite',
+            marquee: 'marquee 30s linear infinite',
+            pulseSoft: 'pulseSoft 3.5s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' }
+            },
+            marquee: {
+              '0%': { transform: 'translateX(0)' },
+              '100%': { transform: 'translateX(-50%)' }
+            },
+            pulseSoft: {
+              '0%,100%': { opacity: '.55', transform: 'scale(1)' },
+              '50%': { opacity: '1', transform: 'scale(1.05)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Ícones -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root{
+      --ink:#0a0a0b;
+      --muted:#667085;
+      --line:#e8e8ec;
+      --accent:#15803d;
+      --accent-2:#22c55e;
+      --success:#16a34a;
+      --surface:#ffffff;
+      --soft:#f6f7fb;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: #fff; }
+    body { color: var(--ink); overflow-x: hidden; }
+    ::selection { background: rgba(34,197,94,.18); }
+
+    .container-xl { width:min(1180px, calc(100% - 40px)); margin-inline:auto; }
+
+    
+    /* HERO — versão minimalista, mais editorial e menos “AI slop” */
+    .hero-minimal {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(34,197,94,.08), transparent 28%),
+        linear-gradient(180deg, #fbfbfb 0%, #f7f8f7 48%, #ffffff 100%);
+    }
+
+    .hero-soft-glow{
+      position:absolute;
+      left:50%;
+      top:28%;
+      width:720px;
+      height:420px;
+      transform:translateX(-50%);
+      border-radius:999px;
+      background: radial-gradient(circle, rgba(34,197,94,.12), rgba(16,185,129,.06) 42%, transparent 72%);
+      filter: blur(56px);
+      opacity:.9;
+    }
+
+    .glass {
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(255,255,255,.84);
+      box-shadow: 0 20px 60px rgba(15,23,42,.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .soft-card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 16px 50px rgba(15,23,42,.05);
+    }
+
+    .button-shine { position:relative; overflow:hidden; }
+    .button-shine::after{
+      content:"";
+      position:absolute;
+      top:-80%;
+      left:-32%;
+      width:24%;
+      height:260%;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.34), transparent);
+      transform:rotate(18deg);
+      transition:left .7s ease;
+    }
+    .button-shine:hover::after{ left:110%; }
+
+    .progress-line::after {
+      content:"";
+      display:block;
+      height:100%;
+      width:72%;
+      border-radius:999px;
+      background:linear-gradient(90deg, #16a34a, #22c55e);
+      box-shadow:0 0 18px rgba(34,197,94,.25);
+    }
+
+    .section-kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      border:1px solid #e7e7ec;
+      border-radius:999px;
+      padding:.45rem .7rem;
+      font-size:.78rem;
+      color:#52525b;
+      background:rgba(255,255,255,.92);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .75s ease, transform .75s ease;
+    }
+    .reveal.visible { opacity:1; transform:none; }
+
+    .modal-backdrop {
+      background: rgba(2,6,23,.58);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-chat-scene{
+      position: relative;
+      isolation: isolate;
+      min-height: 500px;
+    }
+
+    .hero-chat-scene::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:0;
+      background-image:url('./hero-chat-bg.png');
+      background-size: cover;
+      background-position: center bottom;
+      filter: blur(1.5px) saturate(.95);
+      transform: scale(1.03);
+    }
+
+    .hero-chat-scene::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:1;
+      background:
+        linear-gradient(180deg, rgba(245,248,252,.18) 0%, rgba(243,247,249,.10) 30%, rgba(236,244,239,.22) 100%),
+        radial-gradient(circle at 50% 18%, rgba(255,255,255,.60), rgba(255,255,255,.14) 40%, transparent 72%);
+    }
+
+
+
+    .whatsapp-support{
+      position:fixed;
+      right:22px;
+      bottom:22px;
+      z-index:90;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .whatsapp-support-label{
+      opacity:0;
+      transform:translateX(8px);
+      pointer-events:none;
+      white-space:nowrap;
+      border:1px solid rgba(15,23,42,.08);
+      border-radius:999px;
+      background:rgba(255,255,255,.94);
+      padding:10px 13px;
+      font-size:12px;
+      font-weight:600;
+      color:#18181b;
+      box-shadow:0 10px 30px rgba(15,23,42,.10);
+      backdrop-filter:blur(12px);
+      transition:opacity .2s ease, transform .2s ease;
+    }
+
+    .whatsapp-support:hover .whatsapp-support-label{
+      opacity:1;
+      transform:translateX(0);
+    }
+
+    .whatsapp-support-button{
+      position:relative;
+      display:grid;
+      place-items:center;
+      width:58px;
+      height:58px;
+      border-radius:999px;
+      background:#25D366;
+      box-shadow:0 14px 34px rgba(37,211,102,.30);
+      transition:transform .2s ease, box-shadow .2s ease;
+    }
+
+    .whatsapp-support-button:hover{
+      transform:translateY(-2px) scale(1.02);
+      box-shadow:0 18px 38px rgba(37,211,102,.36);
+    }
+
+    .whatsapp-support-button::before{
+      content:"";
+      position:absolute;
+      inset:-6px;
+      border:1px solid rgba(37,211,102,.28);
+      border-radius:999px;
+      animation:whatsappPulse 2.4s ease-out infinite;
+    }
+
+    @keyframes whatsappPulse{
+      0%{ transform:scale(.92); opacity:.75; }
+      70%{ transform:scale(1.16); opacity:0; }
+      100%{ transform:scale(1.16); opacity:0; }
+    }
+
+    @media (max-width: 640px){
+      .whatsapp-support{
+        right:16px;
+        bottom:16px;
+      }
+      .whatsapp-support-label{
+        display:none;
+      }
+      .whatsapp-support-button{
+        width:54px;
+        height:54px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      * { scroll-behavior:auto !important; animation:none !important; transition:none !important; }
+      .reveal { opacity:1; transform:none; }
+    }
+  </style>
+</head>
+
+<body class="font-sans antialiased">
+  <!-- ===================== NAV ===================== -->
+  <header class="fixed inset-x-0 top-0 z-50 border-b border-black/[0.05] bg-white/75 backdrop-blur-xl">
+    <div class="container-xl flex h-[72px] items-center justify-between">
+      <a href="#top" class="flex items-center gap-2.5 font-semibold tracking-tight">
+        <img
+          src="./caucifer-logo.png"
+          alt="Caucifer"
+          class="h-10 w-10 object-contain drop-shadow-[0_4px_10px_rgba(34,197,94,.18)]"
+        />
+        <span class="text-[15px] font-bold tracking-[-.03em] text-zinc-950">Caucifer</span>
+      </a>
+
+      <nav class="hidden items-center gap-8 text-sm text-zinc-600 md:flex">
+        <a href="#como-funciona" class="transition hover:text-black">Como funciona</a>
+        <a href="#produto" class="transition hover:text-black">Plataforma</a>
+        <a href="#planos" class="transition hover:text-black">Planos</a>
+        <a href="#faq" class="transition hover:text-black">FAQ</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <a href="#video" class="hidden rounded-xl px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 sm:block">
+          Ver demonstração
+        </a>
+        <button data-open-checkout class="button-shine rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5">
+          Comprar números
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    
+    <!-- ===================== HERO ===================== -->
+    <section class="relative overflow-hidden pt-[72px]">
+      <div class="hero-minimal"></div>
+      <div class="hero-soft-glow"></div>
+
+      <div class="container-xl relative z-10 py-16 sm:py-20 lg:py-24">
+        <div class="mx-auto max-w-[860px] text-center">
+          <div class="reveal mb-6">
+            <div class="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3.5 py-2 text-xs font-medium text-zinc-600 shadow-sm">
+              <img src="./caucifer-logo.png" alt="" aria-hidden="true" class="h-5 w-5 object-contain" />
+              <span><strong class="font-semibold text-zinc-900">Caucifer</strong> · Infraestrutura para operações profissionais de WhatsApp</span>
+            </div>
+          </div>
+
+          <div class="reveal">
+            <h1 class="mx-auto max-w-[840px] text-[46px] font-[800] leading-[.96] tracking-[-.06em] text-zinc-950 sm:text-[62px] lg:text-[78px]">
+              Aquecer números de WhatsApp leva tempo.
+              <span class="block">Mas não precisa ser o seu.</span>
+            </h1>
+          </div>
+
+          <div class="reveal">
+            <p class="mx-auto mt-6 max-w-[700px] text-[17px] leading-7 text-zinc-600 sm:text-[18px]">
+              Compre números robustos, com API oficial, acompanhe a preparação em um só lugar
+              e receba uma estrutura mais pronta para vendas, atendimento, CRM e outros nichos da sua operação.
+            </p>
+          </div>
+
+          <div class="reveal mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <button data-open-checkout class="button-shine inline-flex h-13 items-center justify-center gap-2 rounded-full bg-black px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-black/10 transition hover:-translate-y-0.5">
+              Comprar números
+              <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
+            </button>
+
+            <a href="#agendar" class="inline-flex h-13 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-7 py-3.5 text-sm font-semibold text-zinc-900 transition hover:-translate-y-0.5 hover:bg-zinc-50">
+              Agendar demonstração
+            </a>
+          </div>
+
+          <div class="reveal mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[12px] text-zinc-500">
+            <span class="inline-flex items-center gap-1.5">
+              <i data-lucide="badge-check" class="h-4 w-4 text-emerald-600"></i> API oficial
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <i data-lucide="shield-check" class="h-4 w-4 text-emerald-600"></i> Acompanhamento claro
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <i data-lucide="headphones" class="h-4 w-4 text-emerald-600"></i> Suporte humano
+            </span>
+          </div>
+        </div>
+
+
+      </div>
+    </section>
+
+    <!-- ===================== COMPANY LOGO MARQUEE ===================== -->
+    <section class="border-y border-zinc-100 bg-white py-7">
+      <div class="container-xl mb-5">
+        <p class="text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
+         TESTADO E APROVADO POR:
+        </p>
+      </div>
+
+      <div class="relative overflow-hidden">
+        <!-- fade lateral para o carrossel entrar/sair suavemente -->
+        <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-white to-transparent sm:w-32"></div>
+        <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-white to-transparent sm:w-32"></div>
+
+        <div class="flex w-max min-w-max animate-marquee items-center will-change-transform">
+          <!-- conjunto 1 -->
+          <div class="flex shrink-0 items-center gap-10 pr-10 sm:gap-16 sm:pr-16">
+              <div class="flex h-16 w-[190px] shrink-0 items-center justify-center px-5">
+                <img src="./enterprises/superbet.png" alt="Logo empresa placeholder 1" class="max-w-[200px] object-contain" />
+              </div>
+              <div class="flex h-16 w-[190px] shrink-0 items-center justify-center px-5">
+                <img src="./enterprises/kingpanda.svg" alt="Logo empresa placeholder 2" class="max-w-[200px] object-contain" />
+              </div>
+              <div class="flex h-16 w-[190px] shrink-0 items-center justify-center px-5">
+                <img src="./enterprises/pilhado.png" alt="Logo empresa placeholder 3" class="max-w-[200px] object-contain" />
+              </div>
+              <div class="flex h-16 w-[190px] shrink-0 items-center justify-center px-5">
+                <img src="./enterprises/3cgaming.png" alt="Logo empresa placeholder 4" class="max-w-[200px] object-contain" />
+              </div>
+              <div class="flex h-16 w-[190px] shrink-0 items-center justify-center px-5">
+                <img src="./enterprises/universidade-federal-fluminense.png" alt="Logo empresa placeholder 5" class="max-w-[200px] object-contain" />
+              </div>
+            <div class="flex h-16 w-[190px] shrink-0 items-center justify-center px-5">
+                <img src="./enterprises/midrah.avif" alt="Logo empresa placeholder 5" class="max-w-[200px] object-contain" />
+              </div>
+          </div>
+
+          <!-- conjunto 2: duplicado para loop infinito sem quebra -->
+          <div class="flex shrink-0 items-center gap-10 pr-10 sm:gap-16 sm:pr-16" aria-hidden="true">
+              <div class="flex h-16 w-[190px] shrink-0 items-center justify-center px-5">
+                <img src="./enterprises/superbet.png" alt="" class="max-w-[200px] object-contain" />
+              </div>
+              <div class="flex h-16 w-[190px] shrink-0 items-center justify-center px-5">
+                <img src="./enterprises/kingpanda.svg" alt="" class="max-w-[200px] object-contain" />
+              </div>
+              <div class="flex h-16 w-[190px] shrink-0 items-center justify-center px-5">
+                <img src="./enterprises/pilhado.png" alt="" class="max-w-[200px] object-contain" />
+              </div>
+              <div class="flex h-16 w-[190px] shrink-0 items-center justify-center px-5">
+                <img src="./enterprises/3cgaming.png" alt="" class="max-w-[200px] object-contain" />
+              </div>
+              <div class="flex h-16 w-[190px] shrink-0 items-center justify-center px-5">
+                <img src="./enterprises/universidade-federal-fluminense.png" alt="" class="max-w-[200px] object-contain" />
+              </div>
+             <div class="flex h-16 w-[190px] shrink-0 items-center justify-center px-5">
+                <img src="./enterprises/midrah.avif" alt="" class="max-w-[200px] object-contain" />
+              </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== VIDEO ===================== -->
+    <section id="video" class="py-24 sm:py-32">
+      <div class="container-xl">
+        <div class="reveal mx-auto max-w-2xl text-center">
+          <span class="section-kicker">Veja antes de comprar</span>
+          <h2 class="mt-5 text-4xl font-bold tracking-[-.04em] sm:text-5xl">Conheça a plataforma em menos de 2 minutos.</h2>
+          <p class="mt-4 text-zinc-600">Use este espaço para a sua VSL curta. O player já está desenhado para receber YouTube, Vimeo ou outro iframe.</p>
+        </div>
+
+        <div class="reveal mt-12 overflow-hidden rounded-[28px] border border-zinc-200 bg-zinc-950 p-2 shadow-soft">
+          <div class="relative aspect-video overflow-hidden rounded-[22px] bg-[radial-gradient(circle_at_30%_20%,rgba(34,197,94,.35),transparent_30%),radial-gradient(circle_at_70%_60%,rgba(16,185,129,.28),transparent_32%),#09090b]">
+            <!-- SUBSTITUA este bloco pelo seu iframe:
+            <iframe class="absolute inset-0 h-full w-full" src="SEU_LINK" title="VSL" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            -->
+            <div class="absolute inset-0 grid place-items-center">
+              <button class="grid h-20 w-20 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur transition hover:scale-105 hover:bg-white/15">
+                <i data-lucide="play" class="ml-1 h-8 w-8 fill-current"></i>
+              </button>
+            </div>
+            <div class="absolute bottom-6 left-6 rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-xs text-white/70 backdrop-blur">
+              Seu vídeo entra aqui
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PAIN ===================== -->
+    <section class="bg-zinc-950 py-24 text-white sm:py-32">
+      <div class="container-xl grid gap-14 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
+        <div class="reveal">
+          <span class="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60">O problema não é só comprar um número</span>
+          <h2 class="mt-5 text-4xl font-bold tracking-[-.04em] sm:text-5xl">Sua operação precisa de estrutura antes do primeiro atendimento.</h2>
+          <p class="mt-5 max-w-xl text-base leading-7 text-white/60">
+            Comprar uma linha é só o começo. O que dá confiança para operar é ter processo, visibilidade, suporte e uma preparação coerente com o uso que você pretende fazer.
+          </p>
+        </div>
+
+        <div class="reveal grid gap-3 sm:grid-cols-2">
+          <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+            <div class="grid h-10 w-10 place-items-center rounded-xl bg-white/10">
+              <i data-lucide="timer-reset" class="h-5 w-5"></i>
+            </div>
+            <h3 class="mt-5 font-semibold">Menos improviso</h3>
+            <p class="mt-2 text-sm leading-6 text-white/55">Você acompanha cada etapa sem precisar ficar perguntando “já está pronto?”.</p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+            <div class="grid h-10 w-10 place-items-center rounded-xl bg-white/10">
+              <i data-lucide="shield-check" class="h-5 w-5"></i>
+            </div>
+            <h3 class="mt-5 font-semibold">Uso mais organizado</h3>
+            <p class="mt-2 text-sm leading-6 text-white/55">A preparação considera o tipo de operação e prioriza um começo gradual e responsável.</p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+            <div class="grid h-10 w-10 place-items-center rounded-xl bg-white/10">
+              <i data-lucide="layers-3" class="h-5 w-5"></i>
+            </div>
+            <h3 class="mt-5 font-semibold">Tudo em um lugar</h3>
+            <p class="mt-2 text-sm leading-6 text-white/55">Compra, status, renovação, histórico e suporte organizados no mesmo workspace.</p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+            <div class="grid h-10 w-10 place-items-center rounded-xl bg-white/10">
+              <i data-lucide="user-round-check" class="h-5 w-5"></i>
+            </div>
+            <h3 class="mt-5 font-semibold">Suporte humano</h3>
+            <p class="mt-2 text-sm leading-6 text-white/55">Quando precisar, fale por WhatsApp ou marque uma call direto com o time.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== COMO FUNCIONA ===================== -->
+    <section id="como-funciona" class="py-24 sm:py-32">
+      <div class="container-xl">
+        <div class="reveal max-w-2xl">
+          <span class="section-kicker">Da compra à liberação</span>
+          <h2 class="mt-5 text-4xl font-bold tracking-[-.04em] sm:text-5xl">Um fluxo simples. Sem comprar no escuro.</h2>
+          <p class="mt-4 text-zinc-600">No MVP, você pode começar com parte do processo manual nos bastidores e manter a experiência do cliente clara, rastreável e premium.</p>
+        </div>
+
+        <div class="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <article class="reveal soft-card rounded-3xl p-6">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-zinc-400">01</span>
+              <div class="grid h-10 w-10 place-items-center rounded-xl bg-zinc-100">
+                <i data-lucide="credit-card" class="h-5 w-5"></i>
+              </div>
+            </div>
+            <h3 class="mt-8 text-lg font-semibold">Escolha e pague</h3>
+            <p class="mt-3 text-sm leading-6 text-zinc-500">Selecione a quantidade, faça o pagamento e só então as linhas são provisionadas.</p>
+          </article>
+
+          <article class="reveal soft-card rounded-3xl p-6">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-zinc-400">02</span>
+              <div class="grid h-10 w-10 place-items-center rounded-xl bg-zinc-100">
+                <i data-lucide="list-checks" class="h-5 w-5"></i>
+              </div>
+            </div>
+            <h3 class="mt-8 text-lg font-semibold">Conte sobre a operação</h3>
+            <p class="mt-3 text-sm leading-6 text-zinc-500">Nicho, uso principal e perfil receptivo/operacional em um onboarding de poucos campos.</p>
+          </article>
+
+          <article class="reveal soft-card rounded-3xl p-6">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-zinc-400">03</span>
+              <div class="grid h-10 w-10 place-items-center rounded-xl bg-zinc-100">
+                <i data-lucide="activity" class="h-5 w-5"></i>
+              </div>
+            </div>
+            <h3 class="mt-8 text-lg font-semibold">Acompanhe o preparo</h3>
+            <p class="mt-3 text-sm leading-6 text-zinc-500">Veja status, etapas concluídas e previsão de liberação direto no dashboard.</p>
+          </article>
+
+          <article class="reveal soft-card rounded-3xl p-6">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-zinc-400">04</span>
+              <div class="grid h-10 w-10 place-items-center rounded-xl bg-zinc-100">
+                <i data-lucide="rocket" class="h-5 w-5"></i>
+              </div>
+            </div>
+            <h3 class="mt-8 text-lg font-semibold">Receba e use</h3>
+            <p class="mt-3 text-sm leading-6 text-zinc-500">Quando a etapa termina, você recebe as informações necessárias para levar a linha à sua operação.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PLANS ===================== -->
+    <section id="planos" class="py-24 sm:py-32">
+      <div class="container-xl">
+        <div class="reveal mx-auto max-w-3xl text-center">
+          <span class="section-kicker">Comece com 1 número ou escale em volume</span>
+          <h2 class="mt-5 text-4xl font-bold tracking-[-.04em] sm:text-5xl">Escolha o tamanho da sua operação.</h2>
+          <p class="mt-4 text-zinc-600">
+            A linha é renovada mensalmente enquanto permanecer ativa. A preparação e o aquecimento inicial já estão incluídos no valor do plano.
+          </p>
+        </div>
+
+        <div class="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <!-- TESTADOR -->
+          <article class="reveal rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-sm font-semibold">Testador</div>
+              <span class="rounded-full bg-zinc-100 px-2.5 py-1 text-[10px] font-semibold text-zinc-600">SEM PACOTE MÍNIMO</span>
+            </div>
+            <div class="mt-2 text-sm text-zinc-500">Para testar o Caucifer com números individuais.</div>
+
+            <div class="mt-8">
+              <div class="flex items-end gap-1">
+                <span class="text-4xl font-bold tracking-tight">R$ 69,90</span>
+                <span class="pb-1 text-sm text-zinc-400">/mês</span>
+              </div>
+              <div class="mt-1 text-xs text-zinc-400">por número ativo</div>
+            </div>
+
+            <ul class="mt-6 space-y-3 text-sm text-zinc-600">
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i> Compre 1 número por vez</li>
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i> Onboarding por nicho</li>
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i> Acompanhamento de status</li>
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i> Suporte via WhatsApp</li>
+            </ul>
+
+            <button data-open-checkout class="mt-8 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-50">
+              Comprar 1 número
+            </button>
+          </article>
+
+          <!-- STARTER -->
+          <article class="reveal rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <div class="text-sm font-semibold">Starter</div>
+            <div class="mt-2 text-sm text-zinc-500">Para começar uma operação pequena com desconto.</div>
+
+            <div class="mt-8">
+              <div class="flex items-end gap-1">
+                <span class="text-4xl font-bold tracking-tight">R$ 179,90</span>
+                <span class="pb-1 text-sm text-zinc-400">/mês</span>
+              </div>
+              <div class="mt-1 text-xs text-zinc-400">3 números · ~R$ 59,97 por linha</div>
+            </div>
+
+            <ul class="mt-6 space-y-3 text-sm text-zinc-600">
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i> 3 números no workspace</li>
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i> Onboarding por nicho</li>
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i> Acompanhamento de status</li>
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i> Suporte via WhatsApp</li>
+              <li class="flex gap-2"><i data-lucide="refresh-cw" class="h-4 w-4 shrink-0 text-emerald-600"></i> Reposição da linha se o número cair*</li>
+            </ul>
+
+            <button data-open-checkout class="mt-8 w-full rounded-xl bg-zinc-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-black">
+              Começar com 3
+            </button>
+          </article>
+
+          <!-- OPERAÇÃO -->
+          <article class="reveal relative rounded-3xl border border-emerald-300 bg-zinc-950 p-6 text-white shadow-glow">
+            <span class="absolute right-5 top-5 rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-zinc-950">MAIS ESCOLHIDO</span>
+            <div class="text-sm font-semibold">Operação</div>
+            <div class="mt-2 text-sm text-white/50">Para times que já operam com volume recorrente.</div>
+
+            <div class="mt-8">
+              <div class="flex items-end gap-1">
+                <span class="text-4xl font-bold tracking-tight">R$ 549,90</span>
+                <span class="pb-1 text-sm text-white/40">/mês</span>
+              </div>
+              <div class="mt-1 text-xs text-white/40">10 números · R$ 54,99 por linha</div>
+            </div>
+
+            <ul class="mt-6 space-y-3 text-sm text-white/65">
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-400"></i> 10 números no workspace</li>
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-400"></i> Tudo do Starter</li>
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-400"></i> Prioridade de atendimento</li>
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-400"></i> Gestão em lote</li>
+              <li class="flex gap-2"><i data-lucide="refresh-cw" class="h-4 w-4 shrink-0 text-emerald-400"></i> Reposição da linha se o número cair*</li>
+            </ul>
+
+            <button data-open-checkout class="mt-8 w-full rounded-xl bg-white px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-100">
+              Montar operação
+            </button>
+          </article>
+
+          <!-- SCALE -->
+          <article class="reveal rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <div class="text-sm font-semibold">Scale</div>
+            <div class="mt-2 text-sm text-zinc-500">Para operações maiores, recorrentes ou customizadas.</div>
+
+            <div class="mt-8">
+              <div class="text-4xl font-bold tracking-tight">Sob medida</div>
+              <div class="mt-1 text-xs text-zinc-400">a partir de R$ 49,90 por linha/mês</div>
+            </div>
+
+            <ul class="mt-6 space-y-3 text-sm text-zinc-600">
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i> Compra em volume</li>
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i> Fluxo operacional customizado</li>
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i> Reunião de implantação</li>
+              <li class="flex gap-2"><i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i> Condição comercial por volume</li>
+              <li class="flex gap-2"><i data-lucide="refresh-cw" class="h-4 w-4 shrink-0 text-emerald-600"></i> Reposição da linha se o número cair*</li>
+            </ul>
+
+            <a href="#agendar" class="mt-8 block w-full rounded-xl border border-zinc-200 px-4 py-3 text-center text-sm font-semibold transition hover:bg-zinc-50">
+              Falar com especialista
+            </a>
+          </article>
+        </div>
+
+        <p class="mx-auto mt-6 max-w-3xl text-center text-xs leading-5 text-zinc-400">
+          A mensalidade mantém a linha ativa e é renovada enquanto o número permanecer contratado. O aquecimento inicial está incluído. *Nos planos Starter, Operação e Scale, a reposição da linha está incluída caso o número seja bloqueado ou fique indisponível durante a vigência, conforme os termos do serviço. Nenhum serviço pode garantir ausência de bloqueios.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================== AGENDAR ===================== -->
+    <section id="agendar" class="pb-24 sm:pb-32">
+      <div class="container-xl">
+        <div class="reveal overflow-hidden rounded-[32px] border border-zinc-200 bg-[radial-gradient(circle_at_15%_10%,rgba(34,197,94,.10),transparent_28%),linear-gradient(135deg,#fafafa,#fff)] p-8 sm:p-12">
+          <div class="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div class="max-w-2xl">
+              <span class="section-kicker">Quer entender antes?</span>
+              <h2 class="mt-5 text-3xl font-bold tracking-[-.04em] sm:text-4xl">Marque uma call e desenhe a operação com a gente.</h2>
+              <p class="mt-4 text-zinc-600">Ideal para quem quer começar com mais volume, integrar um time ou entender o melhor fluxo antes de comprar.</p>
+            </div>
+            <div class="flex flex-col gap-3 sm:flex-row lg:flex-col">
+              <!-- Troque pelo seu link real -->
+              <a href="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ36cb2rrrz0C4jFi6X2_4yWMeCq14f8gtAHWQZCI7Q35EVZ6ovVKioS_SPAyYrTNiVzfB-l-IwX?gv=true" target="_blank" rel="noreferrer" class="inline-flex items-center justify-center gap-2 rounded-xl bg-black px-6 py-3.5 text-sm font-semibold text-white">
+                <i data-lucide="calendar-days" class="h-4 w-4"></i> Agendar call
+              </a>
+              <!-- Troque pelo seu WhatsApp -->
+              <a href="https://wa.me/5511989008294?text=Gostaria%20de%20saber%20mais%20sobre%20os%20numeros%20de%20whatsapp" target="_blank" rel="noreferrer" class="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-6 py-3.5 text-sm font-semibold">
+                <i data-lucide="message-circle" class="h-4 w-4"></i> Falar no WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FAQ ===================== -->
+    <section id="faq" class="border-t border-zinc-100 py-24 sm:py-32">
+      <div class="container-xl grid gap-12 lg:grid-cols-[.7fr_1.3fr]">
+        <div class="reveal">
+          <span class="section-kicker">FAQ</span>
+          <h2 class="mt-5 text-4xl font-bold tracking-[-.04em]">Perguntas antes de começar.</h2>
+        </div>
+
+        <div class="reveal divide-y divide-zinc-200 border-y border-zinc-200">
+          <details class="group py-5">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">
+              O número já vem pronto para usar?
+              <i data-lucide="plus" class="h-5 w-5 transition group-open:rotate-45"></i>
+            </summary>
+            <p class="mt-3 max-w-2xl text-sm leading-6 text-zinc-500">A linha passa por um fluxo de provisionamento e preparação antes da liberação. O dashboard mostra o estágio atual e quando ela está disponível para seguir para sua operação.</p>
+          </details>
+          <details class="group py-5">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">
+              Posso usar para atendimento e vendas?
+              <i data-lucide="plus" class="h-5 w-5 transition group-open:rotate-45"></i>
+            </summary>
+            <p class="mt-3 max-w-2xl text-sm leading-6 text-zinc-500">O produto é pensado principalmente para operações receptivas, atendimento, CRM e vendas. O uso deve respeitar consentimento, políticas da Meta e regras aplicáveis à sua operação.</p>
+          </details>
+          <details class="group py-5">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">
+              A linha é mensal?
+              <i data-lucide="plus" class="h-5 w-5 transition group-open:rotate-45"></i>
+            </summary>
+            <p class="mt-3 max-w-2xl text-sm leading-6 text-zinc-500">Sim. Depois de ativada, cada linha mantém uma cobrança recorrente enquanto estiver ativa. O cliente pode acompanhar isso na área de cobrança.</p>
+          </details>
+          <details class="group py-5">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">
+              E se o meu número cair?
+              <i data-lucide="plus" class="h-5 w-5 transition group-open:rotate-45"></i>
+            </summary>
+            <p class="mt-3 max-w-2xl text-sm leading-6 text-zinc-500">
+              Nenhum serviço consegue garantir que uma linha nunca será bloqueada. Nos planos Starter, Operação e Scale, se um número cair ou ficar indisponível durante a vigência do plano, fazemos a reposição da linha conforme os termos do serviço. O plano Testador não inclui reposição.
+            </p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FINAL CTA ===================== -->
+    <section class="pb-24 sm:pb-32">
+      <div class="container-xl">
+        <div class="reveal relative overflow-hidden rounded-[36px] bg-zinc-950 px-7 py-14 text-center text-white sm:px-12 sm:py-20">
+          <div class="absolute left-1/2 top-0 h-64 w-[650px] -translate-x-1/2 rounded-full bg-emerald-500/20 blur-[90px]"></div>
+          <div class="relative mx-auto max-w-3xl">
+            <p class="text-sm font-medium text-white/50">Da compra à operação</p>
+            <h2 class="mt-4 text-4xl font-bold tracking-[-.05em] sm:text-6xl">Sua estrutura começa antes da primeira conversa.</h2>
+            <p class="mx-auto mt-5 max-w-xl text-sm leading-6 text-white/55">Compre, acompanhe e libere seus números em uma experiência construída para dar clareza e controle.</p>
+            <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <button data-open-checkout class="rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-zinc-950">Comprar números</button>
+              <a href="#agendar" class="rounded-xl border border-white/15 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white">Agendar demonstração</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="border-t border-zinc-100 py-8">
+    <div class="container-xl flex flex-col gap-4 text-xs text-zinc-400 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-center gap-2 font-medium text-zinc-700">
+        <img src="./caucifer-logo.png" alt="" aria-hidden="true" class="h-8 w-8 object-contain" />
+        <span class="font-semibold text-zinc-800">Caucifer</span>
+      </div>
+      <p>© <span id="year"></span> Caucifer. Todos os direitos reservados.</p>
+      <div class="flex gap-5">
+        <a href="#" class="hover:text-zinc-700">Termos</a>
+        <a href="#" class="hover:text-zinc-700">Privacidade</a>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ===================== WHATSAPP SUPPORT ===================== -->
+  <!-- Contato de suporte via WhatsApp -->
+  <a
+    href="https://wa.me/5511989008294?text=Gostaria%20de%20saber%20mais%20sobre%20os%20numeros%20de%20whatsapp"
+    target="_blank"
+    rel="noreferrer"
+    class="whatsapp-support"
+    aria-label="Falar com o suporte pelo WhatsApp"
+  >
+    <span class="whatsapp-support-label">Falar com suporte</span>
+    <span class="whatsapp-support-button">
+      <img
+        src="https://cdn.simpleicons.org/whatsapp/FFFFFF"
+        alt=""
+        aria-hidden="true"
+        class="h-7 w-7"
+      />
+      <span class="absolute right-0 top-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-400"></span>
+    </span>
+  </a>
+
+  <!-- ===================== CHECKOUT / PAYWALL MOCK ===================== -->
+  <div id="checkoutModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+    <div data-close-checkout class="modal-backdrop absolute inset-0"></div>
+
+    <div class="relative z-10 w-full max-w-lg rounded-[28px] border border-white/60 bg-white p-6 shadow-2xl sm:p-7">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[.16em] text-emerald-700">Começar agora</div>
+          <h3 class="mt-2 text-2xl font-bold tracking-[-.04em]">Configure seu primeiro pacote.</h3>
+          <p class="mt-2 text-sm leading-6 text-zinc-500">Escolha a quantidade de números. O aquecimento inicial já está incluído no valor do plano; no checkout, o cliente revisa apenas a contratação e a mensalidade recorrente.</p>
+        </div>
+        <button data-close-checkout class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-zinc-100 text-zinc-600 hover:bg-zinc-200">
+          <i data-lucide="x" class="h-4 w-4"></i>
+        </button>
+      </div>
+
+      <form id="onboardingForm" class="mt-6 space-y-4">
+        <label class="block">
+          <span class="mb-2 block text-xs font-semibold text-zinc-700">Seu nome</span>
+          <input name="name" required autocomplete="name" placeholder="Ex.: Maria Silva" class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100" />
+        </label>
+
+        <label class="block">
+          <span class="mb-2 block text-xs font-semibold text-zinc-700">Número de telefone</span>
+          <input id="phone" name="phone" required autocomplete="tel" inputmode="tel" placeholder="+55 (11) 99999-9999" maxlength="19" class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100" />
+          <span id="phoneError" class="mt-1 hidden text-xs text-red-600">Digite um telefone válido com DDD.</span>
+        </label>
+
+        <label class="block">
+          <span class="mb-2 block text-xs font-semibold text-zinc-700">Quantidade de números</span>
+          <select name="quantity" class="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100">
+            <option>1 número · Testador</option>
+            <option>3 números · Starter</option>
+            <option>5 números</option>
+            <option>10 números · Operação</option>
+            <option>Mais de 10 · Scale</option>
+          </select>
+        </label>
+
+        <label class="block">
+          <span class="mb-2 block text-xs font-semibold text-zinc-700">Nicho da operação</span>
+          <input name="niche" required placeholder="Ex.: imobiliária, clínica, agência..." class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100" />
+        </label>
+
+        <label class="block">
+          <span class="mb-2 block text-xs font-semibold text-zinc-700">Como pretende usar?</span>
+          <textarea name="usage" required rows="3" placeholder="Ex.: atendimento receptivo, leads de anúncios e CRM." class="w-full resize-none rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100"></textarea>
+        </label>
+
+        <button id="onboardingSubmit" type="submit" class="button-shine w-full rounded-xl bg-black px-5 py-3.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
+          Enviar dados
+        </button>
+
+        <p id="onboardingStatus" class="hidden text-center text-xs leading-4"></p>
+        <p class="text-center text-[11px] leading-4 text-zinc-400">Ao continuar, seus dados serão enviados para nossa equipe iniciar o atendimento.</p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Ano
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+
+    // Modal checkout
+    const modal = document.getElementById('checkoutModal');
+    const openers = document.querySelectorAll('[data-open-checkout]');
+    const closers = document.querySelectorAll('[data-close-checkout]');
+    const onboardingForm = document.getElementById('onboardingForm');
+    const phoneInput = document.getElementById('phone');
+    const phoneError = document.getElementById('phoneError');
+    const onboardingSubmit = document.getElementById('onboardingSubmit');
+    const onboardingStatus = document.getElementById('onboardingStatus');
+
+    // Cole aqui a URL do Custom Webhook criado no Make.
+    // O token do Telegram deve ficar configurado somente dentro do Make.
+    const TELEGRAM_AUTOMATION_ENDPOINT = 'https://hook.us2.make.com/kluuh3fmhjivb5hg3igb72uvvv8upmk8';
+
+    function formatPhone(value) {
+      const digits = value.replace(/\D/g, '').replace(/^55/, '').slice(0, 11);
+      if (digits.length <= 2) return digits ? `+55 (${digits}` : '';
+      if (digits.length <= 6) return `+55 (${digits.slice(0, 2)}) ${digits.slice(2)}`;
+      if (digits.length <= 10) return `+55 (${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+      return `+55 (${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    }
+
+    function setOnboardingStatus(message, isError = false) {
+      onboardingStatus.textContent = message;
+      onboardingStatus.className = `text-center text-xs leading-4 ${isError ? 'text-red-600' : 'text-emerald-700'}`;
+    }
+
+    phoneInput.addEventListener('input', () => {
+      phoneInput.value = formatPhone(phoneInput.value);
+      phoneError.classList.add('hidden');
+    });
+
+    onboardingForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const phoneDigits = phoneInput.value.replace(/\D/g, '');
+
+      if (phoneDigits.length < 12) {
+        phoneError.classList.remove('hidden');
+        phoneInput.focus();
+        return;
+      }
+
+      if (!TELEGRAM_AUTOMATION_ENDPOINT || TELEGRAM_AUTOMATION_ENDPOINT.includes('https://hook.us2.make.com/kluuh3fmhjivb5hg3igb72uvvv8upmk8')) {
+        setOnboardingStatus('Configure o endpoint de automação antes de publicar este formulário.', true);
+        return;
+      }
+
+      onboardingSubmit.disabled = true;
+      onboardingSubmit.textContent = 'Enviando dados...';
+      onboardingStatus.className = 'hidden';
+
+      const formData = new FormData(onboardingForm);
+      const payload = Object.fromEntries(formData.entries());
+      payload.phone = phoneDigits;
+      payload.source = 'caucifer-landingpage';
+      payload.submittedAt = new Date().toISOString();
+
+      try {
+        const response = await fetch(TELEGRAM_AUTOMATION_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error('Falha no endpoint de automação');
+
+        setOnboardingStatus('Dados enviados. Nossa equipe vai falar com você em breve.');
+        onboardingForm.reset();
+      } catch (error) {
+        setOnboardingStatus('Não foi possível enviar agora. Tente novamente em instantes.', true);
+      } finally {
+        onboardingSubmit.disabled = false;
+        onboardingSubmit.textContent = 'Enviar dados';
+      }
+    });
+
+    function openModal() {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
+    openers.forEach(btn => btn.addEventListener('click', openModal));
+    closers.forEach(btn => btn.addEventListener('click', closeModal));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>
